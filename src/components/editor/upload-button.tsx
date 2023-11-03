@@ -15,7 +15,7 @@ export const UploadButton = () => {
 					<button
 						tabIndex={-1}
 						className={cn(
-							'transition-colors font-mono border border-primary py-1 px-2 rounded text-primary/70 hover:text-primary/80 flex items-center space-x-1'
+							'transition-colors font-mono border border-primary/70 py-1 px-2 rounded text-primary/70 hover:text-primary/80 flex items-center space-x-1'
 						)}>
 						{imageLoading ? <Icons.spinner className='w-4 h-4' /> : <Icons.upload className='w-4 h-4' />}
 
@@ -32,9 +32,7 @@ export const UploadButton = () => {
 						/>
 					</button>
 				</TooltipTrigger>
-				<TooltipContent>
-					<p>Select a file to open in the editor.</p>
-				</TooltipContent>
+				<TooltipContent>Select a file to open in the editor.</TooltipContent>
 			</Tooltip>
 		</TooltipProvider>
 	);

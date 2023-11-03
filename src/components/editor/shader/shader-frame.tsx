@@ -8,8 +8,8 @@ export const ShaderFrame = () => {
 	const { register } = useImageShader();
 
 	return (
-		<div className='flex items-center justify-center'>
-			<canvas {...register()}>Your browser does not support the HTML5 canvas tag.</canvas>
-		</div>
+		<canvas className='mx-auto' {...register()}>
+			Your browser does not support the HTML5 canvas tag.
+		</canvas>
 	);
 };

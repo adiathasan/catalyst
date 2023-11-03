@@ -1,3 +1,5 @@
+import { Download, LucideProps, Upload } from 'lucide-react';
+
 type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const Icons = {
@@ -50,19 +52,6 @@ export const Icons = {
 			<path d='M21 12a9 9 0 1 1-6.219-8.56' />
 		</svg>
 	),
-	upload: (props: IconProps) => (
-		<svg
-			xmlns='http://www.w3.org/2000/svg'
-			width='24'
-			height='24'
-			viewBox='0 0 24 24'
-			fill='none'
-			stroke='currentColor'
-			strokeWidth='2'
-			strokeLinecap='round'
-			strokeLinejoin='round'
-			{...props}>
-			<path d='M12 5v14M19 12l-7-7-7 7' />
-		</svg>
-	),
+	upload: (props: LucideProps) => <Upload {...props} className='w-4 h-4 mr-2' />,
+	download: (props: LucideProps) => <Download {...props} className='w-4 h-4 mr-2' />,
 };

@@ -6,13 +6,24 @@ import { Slider } from '../ui/slider';
 import { useContrast } from '@/store/hooks/useContrast';
 import { useExposure } from '@/store/hooks/useExposure';
 import { useBrightness } from '@/store/hooks/useBrightness';
+import { Button } from '../ui/button';
+import { Icons } from '../global/icons';
 
 export function SidePanel() {
 	return (
-		<div className='space-y-4'>
+		<div className='flex flex-col gap-8'>
 			<Brightness />
 			<Contrast />
 			<Exposure />
+			<section className='py-4 mt-auto'>
+				<Button
+					size='sm'
+					variant='outline'
+					className='flex items-center gap-2 mx-auto text-primary/70 border-primary/70'>
+					<Icons.download className='w-4 h-4 mr-2' />
+					<span>Download</span>
+				</Button>
+			</section>
 		</div>
 	);
 }
