@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
-import { ThemeProvider } from '@/components/global/theme-provider';
-
-import '../globals.css';
 import { cn } from '@/lib/utils';
-import { MainNav } from '@/components/global/main-nav';
 import { Toaster } from '@/components/ui/toaster';
 import { siteConfig } from '@/config/site-config';
+import { ThemeProvider } from '@/components/global/theme-provider';
+import { CanvasRefProvider } from '@/lib/canvas/canvas-ref-context';
+
+import '../globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,10 +21,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 		<html lang='en' suppressHydrationWarning>
 			<head />
 			<body className={cn(inter.className, 'relative flex min-h-screen flex-col')}>
-				<ThemeProvider attribute='class' defaultTheme='dark' enableSystem disableTransitionOnChange>
-					<MainNav />
+				<ThemeProvider attribute='class' defaultTheme='dark'>
 					<Toaster />
-					{children}
+					<CanvasRefProvider>{children}</CanvasRefProvider>
 				</ThemeProvider>
 			</body>
 		</html>

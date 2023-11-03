@@ -3,6 +3,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { siteConfig } from '@/config/site-config';
 import { ImageUtils } from '@/lib/image-utils';
 import { useGlobalStore } from '../global-store';
+import { useFileProcessor } from './useFileProcessor';
 
 /**
  * --------------------------------------------------
@@ -15,10 +16,7 @@ import { useGlobalStore } from '../global-store';
 export const useFileUpload = () => {
 	const [imageLoading, setImageLoading] = React.useState(false);
 
-	const { file, setFile } = useGlobalStore((state) => ({
-		file: state.file,
-		setFile: state.setFile,
-	}));
+	const { file, setFile } = useFileProcessor();
 
 	const { toast } = useToast();
 
@@ -49,8 +47,10 @@ export const useFileUpload = () => {
 
 		setImageLoading(true);
 
+		const image = new ImageUtils(file);
+
 		try {
-			const { width } = await new ImageUtils(file).getNaturalSize();
+			const { width } = await image.getNaturalSize();
 
 			if (width > siteConfig.image.maxImageSize) {
 				toast({
@@ -61,6 +61,8 @@ export const useFileUpload = () => {
 				return;
 			}
 		} catch (error) {
+			setImageLoading(false);
+
 			toast({
 				title: 'Error',
 				description: `Unknown error occurred. Please try again.`,
@@ -69,7 +71,13 @@ export const useFileUpload = () => {
 			return;
 		}
 
-		setFile(file);
+		try {
+			setFile(file, await image.createImageElement());
+
+			setImageLoading(false);
+		} catch (error) {
+			setImageLoading(false);
+		}
 	};
 
 	return { file, handleFileChange, imageLoading, setImageLoading };

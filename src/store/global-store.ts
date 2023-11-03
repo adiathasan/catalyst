@@ -1,10 +1,22 @@
 import { create } from 'zustand';
 
 export interface AppStore {
+	/**
+	 * The prompt dialog state
+	 */
 	promptDialogOpen: boolean;
 	setPromptDialogOpen: (value: boolean) => void;
+
+	/**
+	 * The file that is currently being edited
+	 */
 	file: File | null;
-	setFile: (value: File | null) => void;
+	setFile: (value: File | null, texture: HTMLImageElement) => void;
+	mainTexture: HTMLImageElement | null;
+
+	/**
+	 * Image manipulation values
+	 */
 	brightness: number;
 	setBrightness: (value: number) => void;
 	exposure: number;
@@ -13,17 +25,21 @@ export interface AppStore {
 	setContrast: (value: number) => void;
 }
 
-const useGlobalStore = create<AppStore>()((set) => ({
+export const useGlobalStore = create<AppStore>()((set) => ({
+	// --- Prompt dialog ---
 	promptDialogOpen: true,
 	setPromptDialogOpen: (value) => set({ promptDialogOpen: value }),
+
+	// --- File ---
 	file: null,
-	setFile: (value) => set({ file: value, promptDialogOpen: false }),
+	setFile: (value, texture) => set({ file: value, promptDialogOpen: false, mainTexture: texture }),
+	mainTexture: null,
+
+	// --- Image manipulation values ---
 	brightness: 0,
 	setBrightness: (value) => set({ brightness: value }),
-	exposure: 1,
+	exposure: 0,
 	setExposure: (value) => set({ exposure: value }),
 	contrast: 0,
 	setContrast: (value) => set({ contrast: value }),
 }));
-
-export { useGlobalStore };

@@ -19,7 +19,9 @@ export function MainNav() {
 					</span>
 				</Link>
 				<nav className='flex items-center flex-1 gap-4 text-sm font-medium'>
-					<UploadButton />
+					<span className='relative'>
+						<UploadButton />
+					</span>
 
 					<Link
 						referrerPolicy='no-referrer'

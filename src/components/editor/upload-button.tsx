@@ -6,7 +6,7 @@ import { useFileUpload } from '@/store/hooks/useFileUpload';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 export const UploadButton = () => {
-	const { handleFileChange } = useFileUpload();
+	const { handleFileChange, imageLoading } = useFileUpload();
 
 	return (
 		<TooltipProvider>
@@ -15,10 +15,11 @@ export const UploadButton = () => {
 					<button
 						tabIndex={-1}
 						className={cn(
-							'transition-colors relative font-mono border border-primary py-1 px-2 rounded text-primary/70 hover:text-primary/80 flex items-center space-x-1'
+							'transition-colors font-mono border border-primary py-1 px-2 rounded text-primary/70 hover:text-primary/80 flex items-center space-x-1'
 						)}>
-						<Icons.upload className='w-4 h-4' />
-						<span>Open</span>
+						{imageLoading ? <Icons.spinner className='w-4 h-4' /> : <Icons.upload className='w-4 h-4' />}
+
+						<span>Import</span>
 						<input
 							onChange={handleFileChange}
 							tabIndex={0}

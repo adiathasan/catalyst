@@ -20,7 +20,7 @@ export const UploaderPrompt = () => {
 						e.preventDefault();
 					}}>
 					<DialogHeader className='p-4 bg-slate-800'>
-						<DialogTitle className='flex space-x-2 tracking-widest'>
+						<DialogTitle className='flex items-center space-x-2 tracking-widest'>
 							<Icons.logo className='w-6 h-6' />
 
 							<span>{siteConfig.siteName}</span>
