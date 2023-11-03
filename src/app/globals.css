@@ -2,26 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+@layer base {
+	:root {
+		--gradient: #00ff7f;
+
+		--background: 159 65% 4%;
+		--foreground: 159 10% 97.5%;
+
+		--muted: 159 100% 15.5%;
+		--muted-foreground: 159 10% 55%;
+
+		--popover: 159 100% 0%;
+		--popover-foreground: 159 10% 97.5%;
+
+		--card: 159 100% 0%;
+		--card-foreground: 159 10% 97.5%;
+
+		--border: 159 100% 15.5%;
+		--input: 159 100% 15.5%;
+
+		--primary: 159 100% 50%;
+		--primary-foreground: 159 10% 5%;
+
+		--secondary: 159 100% 15.5%;
+		--secondary-foreground: 159 10% 97.5%;
+
+		--accent: 159 100% 15.5%;
+		--accent-foreground: 159 10% 97.5%;
+
+		--destructive: 0 62.8% 30.6%;
+		--destructive-foreground: 159 10% 97.5%;
+
+		--ring: 159 100% 50%;
+	}
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer base {
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply bg-background text-foreground;
+		font-feature-settings: 'rlig' 1, 'calt' 1;
+	}
 }
