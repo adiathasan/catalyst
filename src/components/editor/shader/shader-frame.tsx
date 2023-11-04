@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 
-import { useImageShader } from './hooks/useImageShader';
+import { useCanvasReactor } from './hooks/useCanvasReactor';
 
 export const ShaderFrame = () => {
-	const { register } = useImageShader();
+	const { register } = useCanvasReactor();
 
 	return (
 		<canvas className='mx-auto' {...register()}>

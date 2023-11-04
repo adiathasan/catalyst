@@ -1,9 +1,9 @@
 import * as React from 'react';
+
 import { useToast } from '@/components/ui/use-toast';
 import { siteConfig } from '@/config/site-config';
 import { ImageUtils } from '@/lib/image-utils';
-import { useGlobalStore } from '../global-store';
-import { useFileProcessor } from './useFileProcessor';
+import { useFileStore } from '@/store/hooks/useFileStore';
 
 /**
  * --------------------------------------------------
@@ -16,7 +16,7 @@ import { useFileProcessor } from './useFileProcessor';
 export const useFileUpload = () => {
 	const [imageLoading, setImageLoading] = React.useState(false);
 
-	const { file, setFile } = useFileProcessor();
+	const { file, setFile } = useFileStore();
 
 	const { toast } = useToast();
 
@@ -53,6 +53,8 @@ export const useFileUpload = () => {
 			const { width } = await image.getNaturalSize();
 
 			if (width > siteConfig.image.maxImageSize) {
+				setImageLoading(false);
+
 				toast({
 					title: 'Error',
 					description: `File size is too big. Max file size is ${siteConfig.image.maxImageSize} px`,

@@ -7,10 +7,19 @@ import { Icons } from '../global/icons';
 import { siteConfig } from '@/config/site-config';
 import { UploadButton } from './upload-button';
 import { usePromptDialog } from '@/store/hooks/usePromptDialog';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 
 export const UploaderPrompt = () => {
-	const { promptDialogOpen } = usePromptDialog();
+	const { promptDialogOpen, setPromptDialogOpen } = usePromptDialog();
+
+	/**
+	 * Had to do this hack because Next - 14 was complaining about
+	 * Error: Hydration failed because the initial UI...
+	 * @see https://github.com/vercel/next.js/discussions/35773
+	 */
+	React.useEffect(() => {
+		setPromptDialogOpen(true);
+	}, [setPromptDialogOpen]);
 
 	return (
 		<div className={promptDialogOpen ? cn('fixed inset-0 z-30 bg-background/80 backdrop-blur-sm') : 'opacity-0'}>
@@ -20,16 +29,17 @@ export const UploaderPrompt = () => {
 						e.preventDefault();
 					}}>
 					<DialogHeader className='p-4 bg-slate-800'>
-						<DialogTitle className='flex items-center space-x-2 tracking-widest'>
+						<DialogTitle className='flex items-center gap-2 tracking-widest'>
 							<Icons.logo className='w-6 h-6' />
 
 							<span>{siteConfig.siteName}</span>
 						</DialogTitle>
+						<p className='text-sm tracking-widest text-slate-400'>{siteConfig.siteDescription}</p>
 					</DialogHeader>
-					<DialogDescription className='flex items-center gap-6 mt-4'>
-						<span>Please Select to Continue</span>
+					<div className='flex items-center gap-6 mt-4'>
+						<span className='font-mono text-primary/60'>Please Select to Continue</span>
 						<UploadButton />
-					</DialogDescription>
+					</div>
 				</DialogContent>
 			</Dialog>
 		</div>

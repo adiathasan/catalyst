@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { Download, LucideProps, Upload } from 'lucide-react';
 
 type IconProps = React.HTMLAttributes<SVGElement>;
@@ -48,7 +49,8 @@ export const Icons = {
 			strokeWidth='2'
 			strokeLinecap='round'
 			strokeLinejoin='round'
-			{...props}>
+			{...props}
+			className={cn('animate-spin', props.className)}>
 			<path d='M21 12a9 9 0 1 1-6.219-8.56' />
 		</svg>
 	),

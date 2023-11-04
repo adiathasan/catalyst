@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 import { Icons } from '../global/icons';
-import { useFileUpload } from '@/store/hooks/useFileUpload';
+import { useFileUpload } from '@/components/editor/hooks/useFileUpload';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 export const UploadButton = () => {
@@ -13,6 +13,7 @@ export const UploadButton = () => {
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<button
+						disabled={imageLoading}
 						tabIndex={-1}
 						className={cn(
 							'transition-colors font-mono border border-primary/70 py-1 px-2 rounded text-primary/70 hover:text-primary/80 flex items-center space-x-1'

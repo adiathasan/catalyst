@@ -1,15 +1,68 @@
 'use client';
 
 import * as React from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
+import { Icons } from '../global/icons';
 import { Slider } from '../ui/slider';
+import { Button } from '../ui/button';
+import { useToast } from '../ui/use-toast';
+import { siteConfig } from '@/config/site-config';
 import { useContrast } from '@/store/hooks/useContrast';
 import { useExposure } from '@/store/hooks/useExposure';
+import { useFileStore } from '@/store/hooks/useFileStore';
+import { downloadBlob } from '@/lib/utils';
 import { useBrightness } from '@/store/hooks/useBrightness';
-import { Button } from '../ui/button';
-import { Icons } from '../global/icons';
+import { useGlobalStore } from '@/store/global-store';
 
 export function SidePanel() {
+	const { canvas, render } = useGlobalStore(
+		useShallow((state) => ({
+			canvas: state.canvas,
+			render: state.render,
+		}))
+	);
+
+	const [isLoading, setIsLoading] = React.useState(false);
+
+	const { file } = useFileStore();
+
+	const { toast } = useToast();
+
+	const downloadImage = () => {
+		const triggerError = () => {
+			toast({
+				title: 'No image to download',
+				variant: 'destructive',
+			});
+		};
+
+		if (!canvas || !file) {
+			triggerError();
+			return;
+		}
+
+		setIsLoading(true);
+
+		/**
+		 * Render before downloading
+		 * If rendering is not done, it will download a blank image
+		 * @see https://webglfundamentals.org/webgl/lessons/webgl-tips.html
+		 */
+		render();
+
+		canvas.toBlob((blob) => {
+			if (!blob) {
+				triggerError();
+				setIsLoading(false);
+				return;
+			}
+
+			setIsLoading(false);
+			downloadBlob(blob, `${siteConfig.siteName}-${file.name}`);
+		});
+	};
+
 	return (
 		<div className='flex flex-col gap-8'>
 			<Brightness />
@@ -17,10 +70,11 @@ export function SidePanel() {
 			<Exposure />
 			<section className='py-4 mt-auto'>
 				<Button
+					onClick={downloadImage}
 					size='sm'
 					variant='outline'
 					className='flex items-center gap-2 mx-auto text-primary/70 border-primary/70'>
-					<Icons.download className='w-4 h-4 mr-2' />
+					{isLoading ? <Icons.spinner className='w-4 h-4 mr-2' /> : <Icons.download className='w-4 h-4 mr-2' />}
 					<span>Download</span>
 				</Button>
 			</section>

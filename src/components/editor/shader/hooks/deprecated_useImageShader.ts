@@ -2,12 +2,17 @@ import * as React from 'react';
 
 import * as filters from '../glsl/image-filter-fragment-shaders';
 import { WebGL } from '@/lib/webgl/webgl-types';
+import { useToast } from '@/components/ui/use-toast';
+import { useFileStore } from '@/store/hooks/useFileStore';
 import { useGlobalStore } from '@/store/global-store';
-import { useFileProcessor } from '@/store/hooks/useFileProcessor';
 import { createFrameBuffer, createShaderProgramFromSource, resizeCanvasToDisplaySize } from '@/lib/webgl/webgl-utils';
 
 const fragmentShaders = [filters.textureShader, filters.brightnessContrast, filters.exposure];
 
+/**
+ * This is the default vertex shader used for all fragment shaders.
+ * It maps the [-1, 1] coord space to [0, 1] for the fragment shader.
+ */
 const defaultVertexShader = `
 	attribute vec2 a_position;
 	attribute vec2 a_texCoord;
@@ -23,19 +28,28 @@ const defaultVertexShader = `
 	}
 `;
 
-const defaultFragmentShader = `
-	precision mediump float;
-	varying vec2 v_position;
-
-	void main() {
-		gl_FragColor = vec4(v_position, 0.5, 1.0);
-	}
-`;
-
+/**
+ * @deprecated
+ *
+ * Moved rendering logic outside of component tree
+ *
+ * @see `useCanvasReactor.ts` for new implementation
+ */
 export const useImageShader = () => {
-	const { mainTexture: texture } = useFileProcessor();
-
 	const canvasRef = React.useRef<HTMLCanvasElement>(null);
+
+	const { mainTexture: texture } = useFileStore();
+
+	const { toast } = useToast();
+
+	const commonGlError = React.useCallback(() => {
+		toast({
+			title: 'Error',
+			description: 'An error occurred while rendering the image.',
+			duration: 5000,
+			variant: 'destructive',
+		});
+	}, [toast]);
 
 	const width = texture?.width ?? 500;
 
@@ -46,7 +60,7 @@ export const useImageShader = () => {
 		shaderPrograms: WebGLProgram[];
 		startTexture?: WebGLTexture;
 		gl?: WebGL;
-		render?: (uniformArray: any[]) => void;
+		render?: () => void;
 	}>({
 		mountTime: 0,
 		shaderPrograms: [],
@@ -58,7 +72,7 @@ export const useImageShader = () => {
 		exposure: state.exposure,
 	}));
 
-	const uniforms = React.useMemo(
+	const uniformValues = React.useMemo(
 		() => [
 			null, // texture
 			{ brightness, contrast },
@@ -68,17 +82,16 @@ export const useImageShader = () => {
 	);
 
 	React.useEffect(() => {
-		// console.log("in useEffect!!!1");
-		const canvas = canvasRef.current;
+		const canvas = canvasRef?.current;
 
 		if (!canvas) {
-			throw new Error('No canvas found');
+			return commonGlError();
 		}
 
 		const gl = canvas.getContext('webgl');
 
 		if (!gl) {
-			throw new Error('No gl found');
+			return commonGlError();
 		}
 
 		let currentFrameBufferObject = createFrameBuffer(gl, width, height);
@@ -108,12 +121,8 @@ export const useImageShader = () => {
 			const positionAttrLocation = gl.getAttribLocation(shaderProgram, 'a_position');
 
 			if (positionAttrLocation !== null) {
-				// console.log("enable vertex positions!");
-
-				// Turn on the position attribute
 				gl.enableVertexAttribArray(positionAttrLocation);
 
-				// Bind the position buffer.
 				gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
 				// Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
@@ -128,6 +137,7 @@ export const useImageShader = () => {
 			}
 
 			const textureCoordAttrLocation = gl.getAttribLocation(shaderProgram, 'a_texCoord');
+
 			if (textureCoordAttrLocation !== null) {
 				// console.log("enable texture coords!");
 				// Turn on the texcoord attribute
@@ -149,7 +159,6 @@ export const useImageShader = () => {
 			const textureSizeUniformLocation = gl.getUniformLocation(shaderProgram, 'u_texSize');
 			if (textureSizeUniformLocation !== null && texture) {
 				// set the size of the image
-				// console.log("set texture size uniform!");
 				gl.uniform2f(textureSizeUniformLocation, texture.width, texture.height);
 			}
 
@@ -174,11 +183,11 @@ export const useImageShader = () => {
 			}
 		};
 
-		const render = (uniformArray: any[]) => {
+		const render = () => {
 			const { shaderPrograms } = dataRef.current;
 
 			if (!shaderPrograms) {
-				return;
+				return commonGlError();
 			}
 
 			resizeCanvasToDisplaySize(gl.canvas as HTMLCanvasElement);
@@ -193,11 +202,10 @@ export const useImageShader = () => {
 			const numShaderPrograms = shaderPrograms.length;
 
 			for (let x = 0, len = numShaderPrograms - 1; x < len; x++) {
-				// console.log("in render pass!");
 				const shaderProgram = shaderPrograms[x];
-				const uniforms = uniformArray[x];
+				const _uniforms = uniformValues[x];
 
-				prepareRenderPass(shaderProgram, uniforms);
+				prepareRenderPass(shaderProgram, _uniforms);
 
 				// drawing to an internal texture as part of a multi-pass render pipeline
 				gl.bindFramebuffer(gl.FRAMEBUFFER, currentFrameBufferObject.frameBuffer);
@@ -211,7 +219,7 @@ export const useImageShader = () => {
 				previousFrameBufferObject = temp;
 			}
 
-			prepareRenderPass(shaderPrograms[numShaderPrograms - 1], uniformArray[numShaderPrograms - 1]);
+			prepareRenderPass(shaderPrograms[numShaderPrograms - 1], uniformValues[numShaderPrograms - 1]);
 
 			// finally draw to the screen
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -223,25 +231,25 @@ export const useImageShader = () => {
 		dataRef.current.gl = gl;
 		dataRef.current.render = render;
 		dataRef.current.mountTime = Date.now();
-	}, [height, texture, width]);
+	}, [canvasRef, commonGlError, height, texture, uniformValues, width]);
 
 	React.useEffect(() => {
 		const { gl } = dataRef.current;
 
 		if (!gl) {
-			return;
+			return commonGlError();
 		}
 
 		dataRef.current.shaderPrograms = fragmentShaders.map((fragmentShader) =>
 			createShaderProgramFromSource(gl, defaultVertexShader, fragmentShader)
 		);
-	}, []);
+	}, [commonGlError]);
 
 	React.useEffect(() => {
 		const { gl } = dataRef.current;
 
 		if (!gl) {
-			return;
+			return commonGlError();
 		}
 
 		if (texture) {
@@ -252,7 +260,7 @@ export const useImageShader = () => {
 			const glTexture = gl.createTexture();
 
 			if (!glTexture) {
-				return;
+				return commonGlError();
 			}
 
 			gl.bindTexture(gl.TEXTURE_2D, glTexture);
@@ -267,9 +275,9 @@ export const useImageShader = () => {
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture);
 
 			dataRef.current.startTexture = glTexture;
-			dataRef.current.render?.(uniforms);
+			dataRef.current.render?.();
 		}
-	}, [texture, uniforms]);
+	}, [commonGlError, texture, uniformValues]);
 
 	return {
 		register: () => {
@@ -279,5 +287,6 @@ export const useImageShader = () => {
 				height,
 			};
 		},
+		render: dataRef.current.render,
 	};
 };

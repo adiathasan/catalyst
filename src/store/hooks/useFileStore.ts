@@ -2,7 +2,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { useGlobalStore } from '../global-store';
 
-export const useFileProcessor = () => {
+export const useFileStore = () => {
 	const { file, setFile, mainTexture } = useGlobalStore(
 		useShallow((state) => ({
 			file: state.file,
