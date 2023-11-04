@@ -52,6 +52,8 @@ export interface AppStore {
 	setExposure: (value: number) => void;
 	contrast: number;
 	setContrast: (value: number) => void;
+	quality: number;
+	setQuality: (value: number) => void;
 
 	/**
 	 * The current shader program
@@ -68,6 +70,13 @@ export interface AppStore {
 	onAttributeChange: () => void;
 }
 
+const defaultStoreValues: Partial<AppStore> = {
+	brightness: 0,
+	contrast: 0,
+	exposure: 0,
+	quality: 0.75,
+};
+
 export const useGlobalStore = create<AppStore>()((set, get) => ({
 	// --- Prompt dialog ---
 	promptDialogOpen: false,
@@ -76,7 +85,7 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 	// --- File ---
 	file: null,
 	setFile: (value, texture) => {
-		set({ file: value, promptDialogOpen: false, mainTexture: texture });
+		set({ file: value, promptDialogOpen: false, mainTexture: texture, ...defaultStoreValues });
 		/**
 		 * Hack to pull the onAttributeChange call out of the current call stack
 		 * so that the canvas is ready to be rendered when all the Fns are executed
@@ -88,20 +97,24 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 	mainTexture: null,
 
 	// --- Image manipulation values ---
-	brightness: 0,
+	brightness: defaultStoreValues.brightness!,
 	setBrightness: (value) => {
 		set({ brightness: value });
 		get().onAttributeChange();
 	},
-	exposure: 0,
+	exposure: defaultStoreValues.exposure!,
 	setExposure: (value) => {
 		set({ exposure: value });
 		get().onAttributeChange();
 	},
-	contrast: 0,
+	contrast: defaultStoreValues.contrast!,
 	setContrast: (value) => {
 		set({ contrast: value });
 		get().onAttributeChange();
+	},
+	quality: defaultStoreValues.quality!,
+	setQuality: (value) => {
+		set({ quality: value });
 	},
 
 	// --- Shader program methods ---

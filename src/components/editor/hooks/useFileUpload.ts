@@ -50,9 +50,9 @@ export const useFileUpload = () => {
 		const image = new ImageUtils(file);
 
 		try {
-			const { width } = await image.getNaturalSize();
+			const { width, height } = await image.getNaturalSize();
 
-			if (width > siteConfig.image.maxImageSize) {
+			if (width > siteConfig.image.maxImageSize || height > siteConfig.image.maxImageSize) {
 				setImageLoading(false);
 
 				toast({
