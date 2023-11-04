@@ -204,13 +204,10 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 			const textureCoordAttrLocation = gl.getAttribLocation(shaderProgram, 'a_texCoord');
 
 			if (textureCoordAttrLocation !== null) {
-				// Turn on the texcoord attribute
 				gl.enableVertexAttribArray(textureCoordAttrLocation);
 
-				// bind the texcoord buffer.
 				gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
 
-				// Tell the texcoord attribute how to get data out of texcoordBuffer (ARRAY_BUFFER)
 				// location, size, type, normalize, stride, offset
 				gl.vertexAttribPointer(textureCoordAttrLocation, 2, gl.FLOAT, false, 0, 0);
 			}
