@@ -13,7 +13,7 @@ export const UploaderPrompt = () => {
 	const { promptDialogOpen, setPromptDialogOpen } = usePromptDialog();
 
 	/**
-	 * Had to do this hack because Next - 14 was complaining about
+	 * Had to do this hack because Next - 14 / Server Component was complaining about
 	 * Error: Hydration failed because the initial UI...
 	 * @see https://github.com/vercel/next.js/discussions/35773
 	 */

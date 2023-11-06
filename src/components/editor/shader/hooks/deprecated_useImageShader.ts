@@ -34,6 +34,10 @@ const defaultVertexShader = `
  * Moved rendering logic outside of component tree
  *
  * @see `useCanvasReactor.ts` for new implementation
+ *
+ * @Problems
+ * - It would re-render the whole canvas on every change to the shader program,
+ * which is not necessary. We only need to re-render the shader program.
  */
 export const useImageShader = () => {
 	const canvasRef = React.useRef<HTMLCanvasElement>(null);

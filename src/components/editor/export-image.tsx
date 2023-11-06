@@ -4,15 +4,15 @@ import * as React from 'react';
 
 import { Icons } from '../global/icons';
 import { Button } from '../ui/button';
+import { Slider } from '../ui/slider';
 import { useToast } from '../ui/use-toast';
 import { useShallow } from 'zustand/react/shallow';
 import { siteConfig } from '@/config/site-config';
 import { downloadBlob } from '@/lib/utils';
 import { useFileStore } from '@/store/hooks/useFileStore';
 import { useGlobalStore } from '@/store/global-store';
-import { Slider } from '../ui/slider';
 
-export const DownloadImage = () => {
+export const ExportImage = () => {
 	const { canvas, render, quality, setQuality } = useGlobalStore(
 		useShallow((state) => ({
 			canvas: state.canvas,
@@ -28,7 +28,7 @@ export const DownloadImage = () => {
 
 	const { toast } = useToast();
 
-	const downloadImage = () => {
+	const exportImage = () => {
 		const triggerError = () => {
 			toast({
 				title: 'No image to download',
@@ -65,6 +65,7 @@ export const DownloadImage = () => {
 			quality
 		);
 	};
+
 	return (
 		<div className='flex flex-col gap-4 p-4 border rounded'>
 			<div className='pb-6 space-y-4 border-b'>
@@ -85,12 +86,13 @@ export const DownloadImage = () => {
 				/>
 			</div>
 			<Button
-				onClick={downloadImage}
+				disabled={isLoading}
+				onClick={exportImage}
 				size='sm'
 				variant='outline'
 				className='flex items-center gap-2 mx-auto text-primary/70 border-primary/70'>
 				{isLoading ? <Icons.spinner className='w-4 h-4 mr-2' /> : <Icons.download className='w-4 h-4 mr-2' />}
-				<span>Download</span>
+				<span>Export</span>
 			</Button>
 		</div>
 	);

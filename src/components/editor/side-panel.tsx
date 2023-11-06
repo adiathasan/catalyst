@@ -6,7 +6,7 @@ import { Slider } from '../ui/slider';
 import { useContrast } from '@/store/hooks/useContrast';
 import { useExposure } from '@/store/hooks/useExposure';
 import { useBrightness } from '@/store/hooks/useBrightness';
-import { DownloadImage } from './download-image';
+import { ExportImage } from './export-image';
 
 export function SidePanel() {
 	return (
@@ -15,7 +15,7 @@ export function SidePanel() {
 			<Contrast />
 			<Exposure />
 			<section className='py-4 mt-auto'>
-				<DownloadImage />
+				<ExportImage />
 			</section>
 		</div>
 	);

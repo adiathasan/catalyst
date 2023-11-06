@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 
+import { WebGL } from '@/lib/webgl/webgl-types';
+import { createFrameBuffer, createShaderProgramFromSource, resizeCanvasToDisplaySize } from '@/lib/webgl/webgl-utils';
 import {
 	brightnessContrast,
 	exposure,
 	textureShader,
 } from '@/components/editor/shader/glsl/image-filter-fragment-shaders';
-import { createFrameBuffer, createShaderProgramFromSource, resizeCanvasToDisplaySize } from '@/lib/webgl/webgl-utils';
-import { WebGL } from '@/lib/webgl/webgl-types';
 
 export const fragmentShaders = [textureShader, brightnessContrast, exposure];
 
@@ -117,6 +117,18 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 		set({ quality: value });
 	},
 
+	// --- WebGL ---
+
+	/**
+	 * We can terminate all the re-renders at the component level by
+	 * listening to changes in the attributes and only re-rendering when
+	 * the attributes changes, which is outside of the RFC.
+	 *
+	 * Our logic is separated from the component layer. Hence, we can
+	 * call this function whenever we want to re-render the canvas without even
+	 * sharing the panel state with the preview component layer.
+	 */
+
 	// --- Shader program methods ---
 	startGlTexture: null,
 	setCanvas(value) {
@@ -127,7 +139,10 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 		const { brightness, contrast, exposure } = get();
 
 		return [
-			null, // texture
+			/**
+			 * Texture
+			 */
+			null,
 			{ brightness, contrast },
 			{ exposure },
 		];
@@ -162,7 +177,9 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 		let currentFrameBufferObject = createFrameBuffer(gl, width, height);
 		let previousFrameBufferObject = createFrameBuffer(gl, width, height);
 
-		// Define a surface quad to draw stuff on. It will cover the entire canvas draw area.
+		/**
+		 * Define a surface quad to draw stuff on. It will cover the entire canvas draw area.
+		 */
 		const positionVerts = [-1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0];
 		const textureCoords = [0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0];
 
@@ -170,7 +187,9 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 		gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positionVerts), gl.STATIC_DRAW);
 
-		// Map the corners of the texture to our quad.
+		/**
+		 * Map the corners of the texture to our quad.
+		 */
 		const textureCoordBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
@@ -190,14 +209,31 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 
 				gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-				// Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+				/**
+				 * Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+				 */
 				gl.vertexAttribPointer(
 					positionAttrLocation,
-					2, // size (2 floats per vertex)
-					gl.FLOAT, // type (32bit floats)
-					false, // normalize
-					0, // stride (bytes per vertex, ignored if 0)
-					0 // offset (byte offset in stride to read data, ignored if 0)
+					/**
+					 * size (2 floats per vertex)
+					 */
+					2,
+					/**
+					 * type (32bit floats)
+					 */
+					gl.FLOAT,
+					/**
+					 * normalize
+					 */
+					false,
+					/**
+					 * stride (bytes per vertex, ignored if 0)
+					 */
+					0,
+					/**
+					 * offset (byte offset in stride to read data, ignored if 0)
+					 */
+					0
 				);
 			}
 
@@ -219,7 +255,9 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 
 			const textureSizeUniformLocation = gl.getUniformLocation(shaderProgram, 'u_texSize');
 			if (textureSizeUniformLocation !== null && texture) {
-				// set the size of the image
+				/**
+				 * Set the size of the image
+				 */
 				gl.uniform2f(textureSizeUniformLocation, texture.width, texture.height);
 			}
 
@@ -255,7 +293,9 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 
 			resizeCanvasToDisplaySize(gl.canvas as HTMLCanvasElement);
 
-			// clear canvas
+			/**
+			 * Clear canvas
+			 */
 			gl.clear(gl.COLOR_BUFFER_BIT);
 
 			if (get().startGlTexture) {
@@ -270,13 +310,21 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 
 				prepareRenderPass(shaderProgram, _uniforms);
 
-				// drawing to an internal texture as part of a multi-pass render pipeline
+				/**
+				 * drawing to an internal texture as part of a multi-pass render pipeline
+				 */
 				gl.bindFramebuffer(gl.FRAMEBUFFER, currentFrameBufferObject.frameBuffer);
-				// draw with current shader (prim type, offset, num verts)
+				/**
+				 * draw with current shader (prim type, offset, num verts)
+				 */
 				gl.drawArrays(gl.TRIANGLES, 0, numVerts);
-				// set the current texture to the result so the next shader can pick it up
+				/**
+				 * set the current texture to the result so the next shader can pick it up
+				 */
 				gl.bindTexture(gl.TEXTURE_2D, currentFrameBufferObject.texture);
-				// swap the buffers.
+				/**
+				 * swap the buffers.
+				 */
 				const temp = currentFrameBufferObject;
 				currentFrameBufferObject = previousFrameBufferObject;
 				previousFrameBufferObject = temp;
@@ -284,13 +332,18 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 
 			prepareRenderPass(shaderPrograms[numShaderPrograms - 1], uniformValues[numShaderPrograms - 1]);
 
-			// finally draw to the screen
+			/**
+			 * finally draw to the screen
+			 */
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 			gl.drawArrays(gl.TRIANGLES, 0, numVerts);
 		};
 
 		/**
-		 * Render method
+		 * Render method: set the render method and gl context
+		 *
+		 * we can now call render() method anywhere in the app
+		 * and have the gl context
 		 */
 		set({
 			render,
@@ -310,7 +363,9 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 
 		gl.bindTexture(gl.TEXTURE_2D, glTexture);
 
-		// Set the parameters so we can render any size image.
+		/**
+		 * Set the parameters so we can render any size image.
+		 */
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -322,10 +377,16 @@ export const useGlobalStore = create<AppStore>()((set, get) => ({
 			return throwGlError();
 		}
 
-		// flip y-axis of textures because html canvas 0,0 is not the same as opengl 0,0
+		/**
+		 * The image was loaded tilted 😂
+		 *
+		 * flip y-axis of textures because html canvas 0,0 is not the same as opengl 0,0
+		 */
 		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
-		// Upload the image into the texture.
+		/**
+		 * Upload the image into the texture.
+		 */
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture);
 
 		if (glTexture) {
